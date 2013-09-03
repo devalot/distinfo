@@ -1,0 +1,59 @@
+name:          distinfo
+version:       0.1.0.0
+synopsis:      Example distributed-process + snap application.
+license:       BSD3
+license-file:  LICENSE
+author:        Peter Jones <pjones@devalot.com>
+maintainer:    Peter Jones <pjones@devalot.com>
+copyright:     Copyright (c) 2013 Peter Jones <pjones@devalot.com>
+category:      Concurrency
+build-type:    Simple
+cabal-version: >=1.8
+-- description:         
+
+--------------------------------------------------------------------------------
+library
+  exposed-modules:     
+    DistInfo
+  other-modules:
+    DistInfo.Info
+    DistInfo.Messages
+    DistInfo.Node
+    DistInfo.Server
+    DistInfo.Web
+
+  hs-source-dirs: src
+  ghc-options: -Wall
+  ghc-prof-options: -fprof-auto-top
+
+  extensions:
+    OverloadedStrings, 
+    DeriveDataTypeable, 
+    DeriveGeneric, 
+    RecordWildCards
+
+  build-depends:
+    aeson               >= 0.6   && < 1.0,
+    base                >= 4.6   && < 5,
+    binary              >= 0.5   && < 0.6,
+    bytestring          >= 0.8   && < 0.11,
+    containers          >= 0.5   && < 0.6,
+    distributed-process >= 0.4.2 && < 0.5,
+    mtl                 >= 2.1   && < 2.2,
+    snap                >= 0.12  && < 0.13,
+    snap-core           >= 0.8   && < 0.11,
+    snap-server         >= 0.8   && < 0.11,
+    stm                 >= 2.4   && < 2.5,
+    transformers        >= 0.3   && < 0.4,
+    unix                >= 2.6   && < 2.7
+    
+--------------------------------------------------------------------------------
+executable distinfo
+  main-is: distinfo.hs
+  ghc-options: -Wall -rtsopts -threaded
+  ghc-prof-options: -fprof-auto-top -fprof-cafs
+  extensions: OverloadedStrings, TemplateHaskell, RecordWildCards
+  build-depends: 
+    base, distributed-process, distinfo,
+    distributed-process-simplelocalnet >= 0.2 && < 0.3,
+    optparse-applicative               >= 0.5 && < 0.6
