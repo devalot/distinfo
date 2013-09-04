@@ -16,7 +16,7 @@ module DistInfo.Server (distInfoServer) where
 import Control.Applicative
 import Control.Concurrent.STM
 import Control.Distributed.Process
-import Control.Monad (forever, unless, void, when)
+import Control.Monad (forever, unless, void)
 import qualified Data.Map as Map
 import DistInfo.Info
 import DistInfo.Messages
@@ -34,8 +34,6 @@ distInfoServer webPort = do
     Just port -> liftIO (forkWebServer port info)
     _         -> return ()
 
-  say "starting message loop"
-
   forever $ receiveWait
     [ match $ handleNodeRequest info
     , match $ handleNodeReply info
@@ -51,30 +49,31 @@ distInfoServer webPort = do
 --------------------------------------------------------------------------------
 -- | A distributed process just died.
 handleNotification :: Info -> ProcessMonitorNotification -> Process ()
-handleNotification server (ProcessMonitorNotification _ pid _) =
-  handlePeerDisconnect server pid
+handleNotification info (ProcessMonitorNotification _ pid _) = do
+  say $ "peer died " ++ show pid
+  handlePeerDisconnect info pid
 
 --------------------------------------------------------------------------------
 handleWhereIs :: Info -> WhereIsReply -> Process ()
-handleWhereIs _    (WhereIsReply _ Nothing)    = return ()
-handleWhereIs info (WhereIsReply _ (Just pid)) = do
+handleWhereIs _        (WhereIsReply _ Nothing)    = return ()
+handleWhereIs Info{..} (WhereIsReply _ (Just pid)) = do
   say $ "sending node request to " ++ show pid
-  send pid $ NodeRequest (serverNode info)
+  send pid $! NodeRequest serverNode
 
 --------------------------------------------------------------------------------
 -- | A new peer connected and requested our node information.
 handleNodeRequest :: Info -> NodeRequest -> Process ()
-handleNodeRequest server (NodeRequest node) = do
+handleNodeRequest info (NodeRequest node) = do
   say $ "node requested from " ++ show (nodePID node)
-  handlePeerConnect server node
-  send (nodePID node) (serverNode server)
+  handlePeerConnect info node
+  send (nodePID node) $! NodeReply (serverNode info)
 
 --------------------------------------------------------------------------------
 -- | An existing peer responded with its node information.
 handleNodeReply :: Info -> NodeReply -> Process ()
-handleNodeReply server (NodeReply node) = do
+handleNodeReply info (NodeReply node) = do
   say $ "node reply from " ++ show (nodePID node)
-  handlePeerConnect server node
+  handlePeerConnect info node
 
 --------------------------------------------------------------------------------
 -- | A new peer has connected, add it to the map of peers.

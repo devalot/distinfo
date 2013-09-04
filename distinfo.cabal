@@ -23,7 +23,7 @@ library
     DistInfo.Web
 
   hs-source-dirs: src
-  ghc-options: -Wall
+  ghc-options: -Wall -Werror
   ghc-prof-options: -fprof-auto-top
 
   extensions:
@@ -35,7 +35,7 @@ library
   build-depends:
     aeson               >= 0.6   && < 1.0,
     base                >= 4.6   && < 5,
-    binary              >= 0.5   && < 0.6,
+    binary              >= 0.6.3 && < 0.8,
     bytestring          >= 0.8   && < 0.11,
     containers          >= 0.5   && < 0.6,
     distributed-process >= 0.4.2 && < 0.5,
@@ -50,7 +50,7 @@ library
 --------------------------------------------------------------------------------
 executable distinfo
   main-is: distinfo.hs
-  ghc-options: -Wall -rtsopts -threaded
+  ghc-options: -Wall -Werror -rtsopts
   ghc-prof-options: -fprof-auto-top -fprof-cafs
   extensions: OverloadedStrings, TemplateHaskell, RecordWildCards
   build-depends: 

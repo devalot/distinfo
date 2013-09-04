@@ -38,7 +38,7 @@ conf port = Config.setVerbose   False $
             Config.setErrorLog  Config.ConfigNoLog $
             Config.setAccessLog Config.ConfigNoLog $
             Config.setPort      port $
-            Config.setBind      "0.0.0.0" $
+            Config.setBind      "0.0.0.0"
             Config.defaultConfig
 
 --------------------------------------------------------------------------------

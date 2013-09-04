@@ -16,13 +16,12 @@ module Main (main) where
 import Control.Applicative
 import Control.Distributed.Process
 import Control.Distributed.Process.Backend.SimpleLocalnet
-import Control.Distributed.Process.Closure
 import Control.Distributed.Process.Node (initRemoteTable, runProcess)
-import Control.Monad (forM_)
 import DistInfo
 import Options.Applicative
 
 --------------------------------------------------------------------------------
+-- | Configuration from the command line.
 data Config = Config
   { nodePort  :: String
   , nodeName  :: String
@@ -31,6 +30,7 @@ data Config = Config
   }
 
 --------------------------------------------------------------------------------
+-- | A parser that can create a 'Config' from the command line.
 config :: Parser Config
 config = Config <$> nport
                 <*> name
@@ -64,25 +64,24 @@ config = Config <$> nport
                                help "Enable the web server")
 
 --------------------------------------------------------------------------------
+-- | Parse the command line and return a 'Config'.
 commandLineOptions :: IO Config
 commandLineOptions = execParser $ info options desc
   where options = helper <*> config
         desc    = progDesc "Stupid distributed-process app"
 
 --------------------------------------------------------------------------------
--- | Create the remote table via Template Haskell.
-remotable ['distInfoServer]
-
---------------------------------------------------------------------------------
+-- | Discover peers and then start the server.
 boot :: Config -> Backend -> Process ()
 boot Config{..} backend = do
   nid   <- getSelfNode
-  node  <- localNode
+  pid   <- getSelfPid
   peers <- filter (/= nid) <$> liftIO (findPeers backend 1000000)
 
   say $ "peers: " ++ show peers
-  register "distInfoServer" (nodePID node)
-  forM_ peers $ \peer -> whereisRemoteAsync peer "distInfoServer"
+  register "distInfoServer" pid
+
+  mapM_ (`whereisRemoteAsync` "distInfoServer") peers
   distInfoServer $ if webEnable then Just webPort else Nothing
 
 --------------------------------------------------------------------------------
