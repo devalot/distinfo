@@ -52,7 +52,7 @@ executable distinfo
   main-is: distinfo.hs
   ghc-options: -Wall -Werror -rtsopts
   ghc-prof-options: -fprof-auto-top -fprof-cafs
-  extensions: OverloadedStrings, TemplateHaskell, RecordWildCards
+  extensions: OverloadedStrings, RecordWildCards
   build-depends: 
     base, distributed-process, distinfo,
     distributed-process-simplelocalnet >= 0.2 && < 0.3,
