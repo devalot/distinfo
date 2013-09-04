@@ -26,6 +26,7 @@ import Snap.Core
 import Snap.Http.Server (httpServe)
 import qualified Snap.Http.Server.Config as Config
 import Snap.Snaplet
+import Snap.Util.FileServe (serveDirectory)
 
 --------------------------------------------------------------------------------
 -- | Snaplet data.
@@ -46,15 +47,17 @@ conf port = Config.setVerbose   False $
 routes :: [(ByteString, Handler b App ())]
 routes = [ ("server.json", serverNodeHandler)
          , ("peers.json",  peerNodesHandler)
+         , ("nodes.json",  allNodesHandler)
+         , ("",            serveDirectory "www")
          ]
 
 --------------------------------------------------------------------------------
 -- | Fork a new thread and run a web server in it.
 forkWebServer :: Int -> Info -> IO ()
-forkWebServer port info =
-  void $ forkIO $ do
-    (_, snap, _) <- runSnaplet Nothing (appInit info)
-    httpServe (conf port) snap
+forkWebServer port info = do
+  (_, snap, cleanup) <- runSnaplet Nothing (appInit info)
+  putStrLn $ "starting web server on port " ++ show port
+  void $ forkFinally (httpServe (conf port) snap) (const cleanup)
 
 --------------------------------------------------------------------------------
 -- | Initialize the main snaplet.
@@ -77,3 +80,11 @@ peerNodesHandler = do
   (App info) <- ask
   peers <- liftIO $ readTVarIO (peerNodes info)
   writeLBS $! Aeson.encode (Map.elems peers)
+
+--------------------------------------------------------------------------------
+-- | Handler to return information about all nodes combined.
+allNodesHandler :: Handler b App ()
+allNodesHandler = do
+  (App info) <- ask
+  peers <- liftIO $ readTVarIO (peerNodes info)
+  writeLBS $! Aeson.encode (serverNode info : Map.elems peers)

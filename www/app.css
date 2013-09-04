@@ -1,0 +1,19 @@
+body {width: 100%;}
+
+#main {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+h1 {text-align: center;}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid black;
+}
+
+thead tr {background-color: #ddd;}
+tr {border: 1px solid #888;}
+td {padding: 2px 8px;}
+.footer {text-align: center;}
