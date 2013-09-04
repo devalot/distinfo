@@ -5,6 +5,9 @@ var NodesController = function($scope, $http, $timeout) {
     $http.get('/nodes.json').
       success(function(data, status, headers, config) {
         $scope.nodes = data;
+      }).
+      error(function(data, status, headers, config) {
+        $scope.nodes = [];
       });
   };
 
